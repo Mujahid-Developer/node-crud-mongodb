@@ -1,4 +1,4 @@
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const express = require('express');
 const cors = require('cors')
@@ -24,20 +24,27 @@ async function run () {
       const database = client.db("foodMaster");
       const userCollection = database.collection("users");
 
-      // POST API
-      app.post('/users', async (req, res) => {
-          const newUser = req.body
-          const result = await userCollection.insertOne(newUser)
-          console.log('hitting the post', result);
-          res.json(result)
-      })
       // GET API
       app.get('/users', async (req, res) => {
           const results = userCollection.find({})
           const users = await results.toArray()
-          console.log('hitting the post', users);
-          res.send(users)
+          res.json(users)
       })
+      // POST API
+      app.post('/users', async (req, res) => {
+          const newUser = req.body
+          const result = await userCollection.insertOne(newUser)
+          res.json(result)
+      })
+      //DELETE API
+      app.delete('/users/:id', async(req, res)=>{
+          const id = req.params.id;
+          const query = {_id: ObjectId(id)}
+          const result = await userCollection.deleteOne(query)
+          console.log("Deleting this user with id", result);
+          res.json(result)
+      })
+
       
     } 
     finally {

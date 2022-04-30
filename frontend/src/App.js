@@ -8,8 +8,10 @@ function App() {
   const nameRef = useRef();
   const emailRef = useRef();
   const phoneRef = useRef();
-  const url = "http://localhost:5000/users";
+
+  // get Users
   useEffect(() => {
+      const url = "http://localhost:5000/users";
     fetch(url)
       .then((res) => res.json())
       .then((data) => setUsers(data));
@@ -21,7 +23,8 @@ function App() {
     const phone = phoneRef.current.value;
     const newUser = { name: name, email: email, phone: phone };
 
-    // Send data to the server
+    // Add an User
+    const url = "http://localhost:5000/users";
     fetch(url, {
       method: "POST",
       headers: {
@@ -31,13 +34,31 @@ function App() {
     })
       .then((res) => res.json())
       .then((data) => {
-        const addedUser = data;
-        const newUser = [...users, addedUser];
-        setUsers(newUser);
-        e.target.reset()
+        if(data.insertedId){
+          alert('Successfully adedd the user!')
+          e.target.reset();
+        }
       });
     e.preventDefault();
   };
+  // Delete User
+  const handleDeleteUser =(id)=>{
+    const proceed = window.confirm("Are you sure wnat to delete?")
+    if (proceed){
+      const url = `http://localhost:5000/users/${id}`;
+      fetch(url, {
+        method: "DELETE",
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.deletedCount > 0) {
+            alert("Deleted Successfully");
+            const remainingUsers = users.filter((user) => user._id !== id);
+            setUsers(remainingUsers);
+          }
+        });
+    }
+  }
 
   return (
     <div className="App">
@@ -71,6 +92,10 @@ function App() {
               <h1 className="fw-bold text-uppercase">{name}</h1>
               <h4>{email}</h4>
               {!phone ? <h4>No Number</h4> : <h5>{phone}</h5>}
+              <div>
+                <button className="btn btn-warning">Update</button>
+                <button className="btn btn-danger" onClick={()=>handleDeleteUser(_id)}>X</button>
+              </div>
             </Card>
           ))}
         </Card>
