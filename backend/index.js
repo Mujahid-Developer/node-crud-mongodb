@@ -1,58 +1,55 @@
+const { MongoClient, ServerApiVersion } = require("mongodb");
 const express = require('express');
 const cors = require('cors')
 const app = express();
 const port = process.env.PORT||5000
 
+// Middleware
 app.use(cors())
 app.use(express.json());
 
-app.get('/', (req, res)=>{
-    res.send('Wow! im learning node from programming hero')
-})
+// MongoDB Credentials
+// Username: mydbuser1
+// password: K9mdLWPfkefTLHkl
+const uri =
+  "mongodb+srv://mydbuser1:K9mdLWPfkefTLHkl@cluster0.hxk2b.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+const client = new MongoClient(uri, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  serverApi: ServerApiVersion.v1,
+});
 
-// app.get('/users',(req, res)=>{
-//     res.send(users)
-// })
+async function run () {
+    try {
+      await client.connect();
+      const database = client.db("foodMaster");
+      const userCollection = database.collection("users");
 
-app.get('/users/:id',(req, res)=>{
-    // Use Dynamic params
-    const index = req.params.id;
-    const user = users[index]
-    console.log(req.params.id)
-    res.send(user)
-})
-
-app.get('/users',(req, res)=>{
-    // Use Query params
-    const search =req.query.search
-    if (search){
-        const searchResult = users.filter((user)=>user.name.toLocaleLowerCase().includes(search))
-        res.send(searchResult)
+      // POST API
+      app.post('/users', async (req, res) => {
+          const newUser = req.body
+          const result = await userCollection.insertOne(newUser)
+          console.log('hitting the post', result);
+          res.json(result)
+      })
+      // GET API
+      app.get('/users', async (req, res) => {
+          const results = userCollection.find({})
+          const users = await results.toArray()
+          console.log('hitting the post', users);
+          res.send(users)
+      })
+      
+    } 
+    finally {
+        // await client.close()
     }
-    else{
-        res.send(users)
-    }
-})
+}
+run().catch(console.dir)
 
-// App Post Method
-app.post('/users', (req, res)=>{
-    const newUser = req.body;
-    newUser.id = users.length;
-    users.push(newUser)
-    console.log('Hitting the server', req.body)
-    res.json(newUser)
-})
-
-
-
-const users = [
-  { id: 0, name: "mujahid", email: "mujahidulislam575@gmail.com", phone: "01722193804" },
-  { id: 1, name: "karim", email: "karim@gmail.com", phone: "01722193804" },
-  { id: 2, name: "Mahfuj", email: "mahfuj@gmail.com", phone: "01722193804" },
-  { id: 3, name: "Munna", email: "munna@gmail.com", phone: "01722193804" },
-  { id: 4, name: "Emon", email: "emon@gmail.com", phone: "01722193804" },
-  { id: 5, name: "Sufian", email: "sufian@gmail.com", phone: "01722193804" },
-];
+app.get("/", (req, res) => {
+  res.send("Wow! im learning node from programming hero");
+});
 
 
 app.listen(port, ()=>{

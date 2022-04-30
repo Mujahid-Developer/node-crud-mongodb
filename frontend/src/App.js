@@ -34,6 +34,7 @@ function App() {
         const addedUser = data;
         const newUser = [...users, addedUser];
         setUsers(newUser);
+        e.target.reset()
       });
     e.preventDefault();
   };
@@ -65,8 +66,8 @@ function App() {
         <h1 className="text-center">Loading...</h1>
       ) : (
         <Card className="card">
-          {users.map(({ name, phone, email, id }) => (
-            <Card className="card-items" key={id}>
+          {users.map(({ name, phone, email, _id }) => (
+            <Card className="card-items" key={_id}>
               <h1 className="fw-bold text-uppercase">{name}</h1>
               <h4>{email}</h4>
               {!phone ? <h4>No Number</h4> : <h5>{phone}</h5>}
